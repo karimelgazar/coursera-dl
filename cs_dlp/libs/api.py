@@ -507,9 +507,13 @@ class VideosV1(object):
 
     @staticmethod
     def from_json(data):
-        videos = [
-            VideoV1(resolution, links["mp4VideoUrl"]) for resolution, links in data["sources"]["byResolution"].items()
-        ]
+        videos = []
+        for resolution, links in data["sources"]["byResolution"].items():
+            # Use `webMVideoUrl` key if `mp4VideoUrl` key doesn't exist
+            url = links.get("mp4VideoUrl", links.get("webMVideoUrl"))
+            if url:
+                videos.append(VideoV1(resolution, url))
+
         videos.sort(key=lambda video: video.resolution, reverse=True)
 
         videos = OrderedDict((video.resolution, video) for video in videos)
